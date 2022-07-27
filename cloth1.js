@@ -7,9 +7,13 @@ let points = []
     sticks = [],
     ball_radius = 1.5,
     bounce = 1,                     // reduce velocity after every bounce
-    gravity = 0.2,
+    gravity = 0.3,
     friction = 1;
 
+let mouse = {
+    x: width/2,
+    y: height/2
+}
 
 function distance(p1, p2){
     let dx = p1.x - p2.x,
@@ -76,10 +80,10 @@ function updatePoints(){
                 p.oldy = p.y + vy*bounce;
             }
 
-            else if(p.y > bottomEdge){
-                p.y = bottomEdge;
-                p.oldy = p.y + vy*bounce;
-            }
+            // else if(p.y > bottomEdge){
+            //     p.y = bottomEdge;
+            //     p.oldy = p.y + vy*bounce;
+            // }
         }
 
     }
@@ -135,15 +139,38 @@ function renderSticks(){
     ctx.stroke();
 }
 
-document.body.addEventListener("click",function(event){
-    for(let i =0;i<cols;i++){
-        points[i].pinned = !points[i].pinned;
+let dragging = false;
+
+document.body.addEventListener("mousedown",function(event){
+    dragging = true;
+});
+
+document.body.addEventListener("mousemove",function(event){
+    if(dragging){
+        mouse.x = event.clientX;
+        mouse.y = event.clientY;
+        for(let i=0;i<sticks.length;i++){
+            // console.log(mouse.x, mouse.y);
+            // console.log(sticks[i].p1.x)
+            if(mouse.x + 10 >= sticks[i].p1.x
+                && mouse.x - 10 <= sticks[i].p1.x 
+                && mouse.y >= sticks[i].p1.y 
+                && mouse.y <= sticks[i].p2.y  ){
+                sticks.splice(i, 1);
+            }
+        }
     }
 });
+
+document.body.addEventListener("mouseup",function(event){
+    dragging = false;
+});
+
+
     
 function generatePoints(rows, cols){
     let initial_x = 0,
-        initial_y = 0;
+        initial_y = -10;
     for(let i=0; i<rows; i++){
         initial_y += 10;
 
@@ -194,7 +221,7 @@ function generateSticks(rows, cols){
     }
 }
 
-function pinPoints(){
+function pinPoints(){ 
     for(let i=0;i<cols;i++){
         points[i].pinned = true;
     }
