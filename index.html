@@ -4,24 +4,27 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
     <title>Document</title>
-    <style>
-    html, body{
-        margin: 0px;
-        /* background-color: black; */
-        overflow: hidden;
-    }
-    canvas{
-        display: block;
-        background-color: black;
-    }
-    </style>
 
 </head>
 <body>
+    <div id="options">
+        <div>
+            <input type="radio", name="Action", id="tear", checked>
+            <label for="tear">Tear</label>
+        </div>
+        <div>
+            <input type="radio", name="Action", id="drag">
+            <label for="drag">Drag</label>
+        </div>
+    </div>
+    
     <canvas id="canvas"></canvas>
     <script src="cloth1.js"></script> 
     <!-- <script src="cloth2.js"></script>  -->
+    <!-- <script src="flag.js"></script>  -->
+
 
 </body>
 </html>

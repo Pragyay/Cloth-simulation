@@ -3,12 +3,15 @@ let canvas = document.getElementById("canvas"),
     width = canvas.width = window.innerWidth,
     height = canvas.height = window.innerHeight;
 
+let RBdrag = document.getElementById('drag'),
+    RBtear = document.getElementById('tear');
+
 let points = []
     sticks = [],
     ball_radius = 1.5,
-    bounce = 1,                     // reduce velocity after every bounce
-    gravity = 0.3,
-    friction = 1;
+    bounce = 1.1,                     // reduce velocity after every bounce
+    gravity = 0.1,
+    friction = 0.999;
 
 let mouse = {
     x: width/2,
@@ -22,8 +25,8 @@ function distance(p1, p2){
     return Math.sqrt(dx*dx + dy*dy);
 }
 
-let rows = 25,
-    cols = 50;
+let rows = 45,
+    cols = 80;
 generatePoints(rows,cols);
 generateSticks(rows,cols);
 
@@ -39,7 +42,9 @@ function update(){
     ctx.clearRect(0,0,width,height);
 
     renderSticks();
-    renderPoints();
+    // renderPoints();
+
+    console.log(points.length);
 
     requestAnimationFrame(update);
 }
@@ -80,10 +85,11 @@ function updatePoints(){
                 p.oldy = p.y + vy*bounce;
             }
 
-            // else if(p.y > bottomEdge){
-            //     p.y = bottomEdge;
-            //     p.oldy = p.y + vy*bounce;
-            // }
+            else if(p.y > bottomEdge){
+                // p.y = bottomEdge;
+                // p.oldy = p.y + vy*bounce;
+                points.splice(i, 1);
+            }
         }
 
     }
@@ -134,58 +140,82 @@ function renderSticks(){
         ctx.moveTo(s.p1.x, s.p1.y);
         ctx.lineTo(s.p2.x, s.p2.y);
     }
-    ctx.strokeStyle = "cyan";
+    ctx.strokeStyle = "white";
     ctx.strokeWidth = 0.1;
     ctx.stroke();
 }
 
-let dragging = false;
+let tearing = false,
+    dragging = false;
 
 document.body.addEventListener("mousedown",function(event){
-    dragging = true;
+    if(RBtear.checked){
+        tearing = true;
+        console.log(tearing);
+    }
+    if(RBdrag.checked){
+        dragging = true;
+        console.log(dragging);
+    }
 });
 
 document.body.addEventListener("mousemove",function(event){
-    if(dragging){
-        mouse.x = event.clientX;
-        mouse.y = event.clientY;
+    mouse.x = event.clientX;
+    mouse.y = event.clientY;
+
+    if(tearing){
         for(let i=0;i<sticks.length;i++){
-            // console.log(mouse.x, mouse.y);
-            // console.log(sticks[i].p1.x)
             if(mouse.x + 10 >= sticks[i].p1.x
                 && mouse.x - 10 <= sticks[i].p1.x 
                 && mouse.y >= sticks[i].p1.y 
-                && mouse.y <= sticks[i].p2.y  ){
+                && mouse.y <= sticks[i].p2.y){
                 sticks.splice(i, 1);
+            }
+        }
+    }
+    if(dragging){
+        for(let i=0;i<points.length;i++){
+            if(mouse.x >= points[i].x - 10 && mouse.x <= points[i].x + 10
+                 && mouse.y >= points[i].y - 10 && mouse.y <= points[i].y + 10){
+                points[i].pinned = false;
+                points[i].x = mouse.x;
+                points[i].y = mouse.y;
             }
         }
     }
 });
 
 document.body.addEventListener("mouseup",function(event){
-    dragging = false;
+    if(RBtear.checked){
+        tearing = false;
+        console.log(tearing);
+    }
+    if(RBdrag.checked){
+        dragging = false;
+        console.log(dragging);
+    }
 });
 
 
     
 function generatePoints(rows, cols){
-    let initial_x = 0,
+    let initial_x = 300,
         initial_y = -10;
     for(let i=0; i<rows; i++){
-        initial_y += 10;
+        initial_y += 7;
 
         for(let j=0; j<cols; j++){
-            initial_x += 10;
+            initial_x += 7;
             let point = {
                 x: initial_x,
                 y: initial_y,
-                oldx: initial_x - 10,
+                oldx: initial_x - 1,
                 oldy: initial_y
             }
             points.push(point);
         }
 
-        initial_x = 0;
+        initial_x = 300;
     }
 }
 
