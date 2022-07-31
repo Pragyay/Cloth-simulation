@@ -8,10 +8,9 @@ canvas{
     position: absolute;
     width: 100%;
     height: 100%;
-    margin: 0px auto;
+    /* margin-left: auto; */
     z-index: -1;
-    
-    
+    /* background-color: orange; */
 }
 #options{
     margin-left: 2%;

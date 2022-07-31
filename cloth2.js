@@ -3,11 +3,15 @@ let canvas = document.getElementById("canvas"),
     width = canvas.width = window.innerWidth,
     height = canvas.height = window.innerHeight;
 
+let RBdrag = document.getElementById('drag'),
+    RBtear = document.getElementById('tear'),
+    RBmove = document.getElementById('move');
+
 let points = []
     sticks = [],
     ball_radius = 1.5,
     bounce = 1,                     // reduce velocity after every bounce
-    gravity = 0.1,
+    gravity = 0.15,
     friction = 0.999;
 
 let mouse = {
@@ -92,11 +96,18 @@ function updatePoints(){
 function renderPoints(){
     for(let i = 0; i < points.length; i++){
         let p = points[i];
-
-        ctx.beginPath();
-        ctx.fillStyle = "red";
-        ctx.arc(p.x, p.y, ball_radius, 0, Math.PI*2);
-        ctx.fill();
+        if(p.pinned){
+            ctx.beginPath();
+            ctx.fillStyle = "red";
+            ctx.arc(p.x, p.y, 5, 0, Math.PI*2);
+            ctx.fill();
+        }else{
+            ctx.beginPath();
+            ctx.fillStyle = "grey";
+            ctx.arc(p.x, p.y, ball_radius, 0, Math.PI*2);
+            ctx.fill();
+        }
+        
     }
 }
 
@@ -134,46 +145,122 @@ function renderSticks(){
         ctx.moveTo(s.p1.x, s.p1.y);
         ctx.lineTo(s.p2.x, s.p2.y);
     }
-    ctx.strokeStyle = "cyan";
+    ctx.strokeStyle = "white";
     ctx.strokeWidth = 0.1;
     ctx.stroke();
 }
 
-let dragging = false;
+let tearing = false,
+    dragging = false,
+    moving = false;
 
 document.body.addEventListener("mousedown",function(event){
-    dragging = true;
+    if(RBtear.checked){
+        tearing = true;
+        // console.log(tearing);
+    }
+    if(RBdrag.checked){
+        dragging = true;
+        // console.log(dragging);
+    }
+    if(RBmove.checked){
+        moving = true;
+    }
 });
 
 document.body.addEventListener("mousemove",function(event){
-    if(dragging){
-        mouse.x = event.clientX;
-        mouse.y = event.clientY;
+    mouse.x = event.clientX;
+    mouse.y = event.clientY;
+
+    if(tearing){
         for(let i=0;i<sticks.length;i++){
-            // console.log(mouse.x, mouse.y);
-            // console.log(sticks[i].p1.x)
-            if(mouse.x + 10 <= sticks[i].p1.x && mouse.y >= sticks[i].p1.y && mouse.y <= sticks[i].p2.y  ){
+            if(mouse.x >= sticks[i].p1.x - 5
+                && mouse.x <= sticks[i].p1.x + 5
+                  && mouse.y >= sticks[i].p1.y 
+                  && mouse.y <= sticks[i].p2.y){
                 sticks.splice(i, 1);
+            }
+        }
+    }
+    if(dragging){
+        for(let i=0;i<points.length;i++){
+            if(mouse.x >= points[i].x - 10 && mouse.x <= points[i].x + 10
+                 && mouse.y >= points[i].y - 10 && mouse.y <= points[i].y + 10){
+                if(!points[i].pinned){
+                    points[i].x = mouse.x;
+                    points[i].y = mouse.y;
+                }
+            }
+        }
+    }
+    if(moving){
+        for(let i=0;i<points.length;i++){
+            if(points[i].pinned){
+                if(mouse.x >= points[i].x - 15 && mouse.x <= points[i].x + 15
+                    && mouse.y >= points[i].y - 15 && mouse.y <= points[i].y + 15){
+                    
+                    points[i].pinned = false;
+                    points[i].x = mouse.x;
+                    points[i].y = mouse.y;
+                    points[i].pinned = true;
+                }
             }
         }
     }
 });
 
 document.body.addEventListener("mouseup",function(event){
-    dragging = false;
+    if(RBtear.checked){
+        tearing = false;
+        // console.log(tearing);
+    }
+    if(RBdrag.checked){
+        dragging = false;
+        // console.log(dragging);
+    }
+    if(RBmove.checked){
+        moving = false;
+    }
 });
 
+// RBtear.addEventListener('change',function(event){
+//     if(this.checked){
+//         tearing = true;
+//     }
+// })
+
+// RBdrag.addEventListener('change',function(event){
+//     if(this.checked){
+
+//     }
+// })
+
+// document.body.addEventListener("click",function(event){
+//     // console.log("click");
+//     mouse.x = event.clientX;
+//     mouse.y = event.clientY;
+//     for(let i=0;i<sticks.length;i++){
+//         // console.log(mouse.x, mouse.y);
+//         // console.log(sticks[i].p1.x)
+//         if(mouse.x >= sticks[i].p1.x - 5
+//             && mouse.x <= sticks[i].p1.x + 5
+//                 && mouse.y >= sticks[i].p1.y 
+//                 && mouse.y <= sticks[i].p2.y){
+                    
+//         }
+//     }
+// })
 
 
     
 function generatePoints(rows, cols){
-    let initial_x = 300,
+    let initial_x = 400,
         initial_y = 20;
     for(let i=0; i<rows; i++){
-        initial_y += 10;
+        initial_y += 8;
 
         for(let j=0; j<cols; j++){
-            initial_x += 10;
+            initial_x += 8;
             let point = {
                 x: initial_x,
                 y: initial_y,
@@ -183,7 +270,7 @@ function generatePoints(rows, cols){
             points.push(point);
         }
 
-        initial_x = 300;
+        initial_x = 400;
     }
 }
 
@@ -224,9 +311,12 @@ function pinPoints(){
     //     points[i].pinned = true;
     // }
     points[0].pinned = true;
-    points[cols-1].pinned = true;
     points[(rows-1)*cols].pinned = true;
+    // points[(rows-1)*cols/2].pinned = true;
+
+    points[cols-1].pinned = true;
     points[rows*cols-1].pinned = true;
+    // points[(rows+1)*cols/2 - 1].pinned = true;
 }
 
 // function addVelocity(){
