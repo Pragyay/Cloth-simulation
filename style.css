@@ -6,10 +6,9 @@ html, body{
 canvas{
     display: block;
     position: absolute;
-    width: 100%;
-    height: 100%;
-    /* margin-left: auto; */
+    align-content: center;
     z-index: -1;
+    margin-left: 15%;
     /* background-color: orange; */
 }
 #options{
