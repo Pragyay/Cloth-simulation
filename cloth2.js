@@ -1,17 +1,18 @@
 let canvas = document.getElementById("canvas"),
     ctx = canvas.getContext("2d"),
-    width = canvas.width = window.innerWidth,
+    width = canvas.width = window.innerWidth*70/100,
     height = canvas.height = window.innerHeight;
 
 let RBdrag = document.getElementById('drag'),
     RBtear = document.getElementById('tear'),
-    RBmove = document.getElementById('move');
+    RBmove = document.getElementById('move'),
+    RBadd = document.getElementById('add');
 
 let points = []
     sticks = [],
     ball_radius = 1.5,
-    bounce = 1,                     // reduce velocity after every bounce
-    gravity = 0.15,
+    bounce = 0.9,                     // reduce velocity after every bounce
+    gravity = 0.09,
     friction = 0.999;
 
 let mouse = {
@@ -26,8 +27,8 @@ function distance(p1, p2){
     return Math.sqrt(dx*dx + dy*dy);
 }
 
-let rows = 25,
-    cols = 50;
+let rows = 30,
+    cols = 70;
 generatePoints(rows,cols);
 generateSticks(rows,cols);
 
@@ -37,9 +38,11 @@ pinPoints();
 update();
 
 function update(){
-    updatePoints();
-    updateSticks();
-
+    for(let i=0; i<2;i++){
+        updatePoints();
+        updateSticks();
+    }
+    
     ctx.clearRect(0,0,width,height);
 
     renderSticks();
@@ -84,10 +87,10 @@ function updatePoints(){
                 p.oldy = p.y + vy*bounce;
             }
 
-            // else if(p.y > bottomEdge){
-            //     p.y = bottomEdge;
-            //     p.oldy = p.y + vy*bounce;
-            // }
+            else if(p.y > bottomEdge){
+                p.y = bottomEdge;
+                p.oldy = p.y + vy*bounce;
+            }
         }
 
     }
@@ -101,12 +104,13 @@ function renderPoints(){
             ctx.fillStyle = "red";
             ctx.arc(p.x, p.y, 5, 0, Math.PI*2);
             ctx.fill();
-        }else{
-            ctx.beginPath();
-            ctx.fillStyle = "grey";
-            ctx.arc(p.x, p.y, ball_radius, 0, Math.PI*2);
-            ctx.fill();
         }
+        // else{
+        //     ctx.beginPath();
+        //     ctx.fillStyle = "grey";
+        //     ctx.arc(p.x, p.y, ball_radius, 0, Math.PI*2);
+        //     ctx.fill();
+        // }
         
     }
 }
@@ -152,7 +156,8 @@ function renderSticks(){
 
 let tearing = false,
     dragging = false,
-    moving = false;
+    moving = false,
+    add = false;
 
 document.body.addEventListener("mousedown",function(event){
     if(RBtear.checked){
@@ -166,11 +171,16 @@ document.body.addEventListener("mousedown",function(event){
     if(RBmove.checked){
         moving = true;
     }
+    if(RBadd.checked){
+        add = true;
+    }
 });
 
 document.body.addEventListener("mousemove",function(event){
-    mouse.x = event.clientX;
-    mouse.y = event.clientY;
+    let rect = canvas.getBoundingClientRect();
+
+    mouse.x = (event.clientX - rect.left) / (rect.right - rect.left) * canvas.width;
+    mouse.y = (event.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
 
     if(tearing){
         for(let i=0;i<sticks.length;i++){
@@ -207,6 +217,14 @@ document.body.addEventListener("mousemove",function(event){
             }
         }
     }
+    if(add){
+        for(let i=0;i<points.length;i++){
+            if(mouse.x >= points[i].x - 5 && mouse.x <= points[i].x + 5
+                 && mouse.y >= points[i].y - 5 && mouse.y <= points[i].y + 5){
+                points[i].pinned = !points[i].pinned;
+            }
+        }
+    }
 });
 
 document.body.addEventListener("mouseup",function(event){
@@ -220,6 +238,9 @@ document.body.addEventListener("mouseup",function(event){
     }
     if(RBmove.checked){
         moving = false;
+    }
+    if(RBadd.checked){
+        add = false;
     }
 });
 
@@ -254,23 +275,23 @@ document.body.addEventListener("mouseup",function(event){
 
     
 function generatePoints(rows, cols){
-    let initial_x = 400,
+    let initial_x = 170,
         initial_y = 20;
     for(let i=0; i<rows; i++){
-        initial_y += 8;
+        initial_y += 7;
 
         for(let j=0; j<cols; j++){
-            initial_x += 8;
+            initial_x += 7;
             let point = {
                 x: initial_x,
                 y: initial_y,
-                oldx: initial_x - 5,
-                oldy: initial_y
+                oldx: initial_x - 3,
+                oldy: initial_y 
             }
             points.push(point);
         }
 
-        initial_x = 400;
+        initial_x = 170;
     }
 }
 
