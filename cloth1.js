@@ -3,16 +3,23 @@ let canvas = document.getElementById("canvas"),
     width = canvas.width = window.innerWidth*70/100,
     height = canvas.height = window.innerHeight;
 
+
+    // radio buttons
 let RBdrag = document.getElementById('drag'),
     RBtear = document.getElementById('tear'),
     RBmove = document.getElementById('move'),
     RBadd = document.getElementById('add');
 
+    // input range
+let space = parseFloat(document.getElementById('spacing').value),
+    rows = parseFloat(document.getElementById('rows').value),
+    cols = parseFloat(document.getElementById('cols').value);
+    
 let points = []
     sticks = [],
     ball_radius = 1.5,
     bounce = 0.9,                     // reduce velocity after every bounce
-    gravity = 0.07,
+    gravity = 0.05,
     friction = 1;
 
 let mouse = {
@@ -27,14 +34,13 @@ function distance(p1, p2){
     return Math.sqrt(dx*dx + dy*dy);
 }
 
-let rows = 50,
-    cols = 70;
+// let rows = 50,
+//     cols = 80;
 
-generatePoints(rows,cols);
-generateSticks(rows,cols);
+generatePoints(rows,cols,space);
+generateSticks(rows,cols,space);
 
 pinPoints();
-// addVelocity();
 
 update();
 
@@ -50,6 +56,45 @@ function update(){
     renderPoints();
 
     requestAnimationFrame(update);
+}
+
+function resetSpacing(ele, value){
+
+    ctx.clearRect(0,0, width,height);
+
+    points = [];
+    sticks = [];
+
+    space = parseFloat(value);
+
+    generatePoints(rows,cols,space);
+    generateSticks(rows,cols,space);
+    pinPoints();
+}
+function resetCols(ele, value){
+
+    ctx.clearRect(0,0, width,height);
+
+    points = [];
+    sticks = [];
+
+    cols = parseFloat(value);
+
+    generatePoints(rows,cols,space);
+    generateSticks(rows,cols,space);
+    pinPoints();
+}
+function resetRows(ele, value){
+
+    ctx.clearRect(0,0, width,height);
+
+    points = [];
+    sticks = [];
+
+    rows = parseFloat(value);
+    generatePoints(rows,cols,space);
+    generateSticks(rows,cols,space);
+    pinPoints();
 }
 
 function updatePoints(){
@@ -89,9 +134,9 @@ function updatePoints(){
             }
 
             else if(p.y > bottomEdge){
-                // p.y = bottomEdge;
-                // p.oldy = p.y + vy*bounce;
-                points.splice(i, 1);
+                p.y = bottomEdge;
+                p.oldy = p.y + vy*bounce;
+                // points.splice(i, 1);    
             }
         }
 
@@ -104,7 +149,7 @@ function renderPoints(){
 
         if(p.pinned){
             ctx.beginPath();
-            ctx.fillStyle = "red";
+            ctx.fillStyle = p.color;
             ctx.arc(p.x, p.y, ball_radius, 0, Math.PI*2);
             ctx.fill();
         }
@@ -157,6 +202,12 @@ let tearing = false,
     moving = false,
     add = false;
 
+let dragHandle;
+let offset = {
+    x:0,
+    y:0
+}
+
 document.body.addEventListener("mousedown",function(event){
     if(RBtear.checked){
         tearing = true;
@@ -167,7 +218,7 @@ document.body.addEventListener("mousedown",function(event){
         // console.log(dragging);
     }
     if(RBmove.checked){
-        moving = true;
+        moving = true;    
     }
     if(RBadd.checked){
         add = true;
@@ -206,19 +257,22 @@ document.body.addEventListener("mousemove",function(event){
             if(points[i].pinned){
                 if(mouse.x >= points[i].x - 5 && mouse.x <= points[i].x + 5
                     && mouse.y >= points[i].y - 5 && mouse.y <= points[i].y + 5){
-                    
-                    points[i].pinned = false;
-                    points[i].x = mouse.x;
-                    points[i].y = mouse.y;
-                    points[i].pinned = true;
+                        points[i].color = "#90ee90";
+
+                        document.body.addEventListener("mousemove",onMouseMove);
+                        document.body.addEventListener("mouseup",onMouseUp);
+
+                        dragHandle = points[i];
+                        offset.x  = event.clientX - points[i].x;
+                        offset.y  = event.clientY - points[i].y;
                 }
             }
         }
     }
     if(add){
         for(let i=0;i<points.length;i++){
-            if(mouse.x >= points[i].x - 5 && mouse.x <= points[i].x + 5
-                 && mouse.y >= points[i].y - 5 && mouse.y <= points[i].y + 5){
+            if(mouse.x >= points[i].x - 10 && mouse.x <= points[i].x + 10
+                 && mouse.y >= points[i].y - 10 && mouse.y <= points[i].y + 10){
                 points[i].pinned = !points[i].pinned;
             }
         }
@@ -242,30 +296,42 @@ document.body.addEventListener("mouseup",function(event){
     }
 });
 
+function onMouseMove(event){
+    dragHandle.x = event.clientX - offset.x;
+    dragHandle.y = event.clientY - offset.y;
+}
+function onMouseUp(event){
+    document.body.removeEventListener("mousemove",onMouseMove);
+    document.body.removeEventListener("mouseup",onMouseUp);
+    moving = false;
+    dragHandle.color = "red";
+}
+
 
     
-function generatePoints(rows, cols){
-    let initial_x = 170,
+function generatePoints(rows, cols, space){
+    let initial_x = (width - (cols*space))/2,
         initial_y = 0;
     for(let i=0; i<rows; i++){
-        initial_y += 7;
+        initial_y += space;
 
         for(let j=0; j<cols; j++){
-            initial_x += 7;
+            initial_x += space;
             let point = {
                 x: initial_x,
                 y: initial_y,
                 oldx: initial_x - 2,
-                oldy: initial_y
+                oldy: initial_y,
+                color: "red"
             }
             points.push(point);
         }
 
-        initial_x = 170;
+        initial_x = (width - (cols*space))/2;
     }
 }
 
-function generateSticks(rows, cols){
+function generateSticks(rows, cols, space){
     // hzt sticks
     let initial_index = 0;
     for(let i=0;i<rows;i++){
@@ -304,7 +370,7 @@ function pinPoints(){
 }
 
 // function addVelocity(){
-//     for(let i= 0; i<cols;i+=cols){
-//         points[i].oldx = points[i].oldx - 20;
+//     for(let i= 0; i<points[i].length;i++){
+//         points[i].x += Math.random()*10;
 //     }
 // }

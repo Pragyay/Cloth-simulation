@@ -11,6 +11,21 @@
 <body>
     <div id="options">
         <div>
+            <label for="spacing">Spacing</label>
+            <input type="range" id="spacing" min="1" max="12" step="1" value="7" oninput="resetSpacing(this,this.value)">
+        </div>
+        <div>
+            <label for="cols">No. of Columns</label>
+            <input type="range" id="cols" min="20" max="80" step="1" value="80" oninput="resetCols(this,this.value)">
+        </div>
+        <div>
+            <label for="rows">No. of rows</label>
+            <input type="range" id="rows" min="20" max="60" step="1" value="50" oninput="resetRows(this,this.value)">
+        </div>
+    </div>
+
+    <div id="actions">
+        <div>
             <input type="radio", name="Action", id="tear", checked>
             <label for="tear">Tear</label>
         </div>
@@ -26,12 +41,13 @@
             <input type="radio", name="Action", id="add">
             <label for="add">Pin/Unpin point</label>
         </div>
+
     </div>
     <div id="canvas_container">
         <canvas id="canvas"></canvas>
     </div>
-    <script src="cloth1.js"></script> 
-    <!-- <script src="cloth2.js"></script>  -->
+    <!-- <script src="cloth1.js"></script>    -->
+    <script src="cloth2.js"></script> 
     <!-- <script src="flag.js"></script>  -->
 
 

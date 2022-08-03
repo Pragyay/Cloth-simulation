@@ -11,14 +11,38 @@ canvas{
     margin-left: 15%;
     /* background-color: orange; */
 }
-#options{
-    margin-left: 2%;
+#actions{
+    margin-right: 2%;
+    margin-left: 82%;
     position: absolute;
     top: 10%;
 }
 
-#options div{
+#actions div{
     margin: 0.5em;
+}
+
+#options{
+    position: absolute;
+    margin-left: 2%;
+    top: 10%;
+}
+
+#options div{
+    display: flex;
+    flex-direction: column;
+    margin: 0.5em;
+}
+
+#options div input{
+    width: 10em;
+    background: transparent;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    font-size: smaller;
+    cursor: pointer;
 }
 
 label{

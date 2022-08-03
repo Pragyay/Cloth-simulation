@@ -8,11 +8,16 @@ let RBdrag = document.getElementById('drag'),
     RBmove = document.getElementById('move'),
     RBadd = document.getElementById('add');
 
+let space = parseFloat(document.getElementById('spacing').value),
+    rows = parseFloat(document.getElementById('rows').value),
+    cols = parseFloat(document.getElementById('cols').value);
+    
+
 let points = []
     sticks = [],
-    ball_radius = 1.5,
+    ball_radius = 10,
     bounce = 0.9,                     // reduce velocity after every bounce
-    gravity = 0.09,
+    gravity = 0.01,
     friction = 0.999;
 
 let mouse = {
@@ -27,10 +32,9 @@ function distance(p1, p2){
     return Math.sqrt(dx*dx + dy*dy);
 }
 
-let rows = 30,
-    cols = 70;
-generatePoints(rows,cols);
-generateSticks(rows,cols);
+
+generatePoints(rows,cols,space);
+generateSticks(rows,cols,space);
 
 pinPoints();
 // addVelocity();
@@ -50,6 +54,46 @@ function update(){
 
     requestAnimationFrame(update);
 }
+
+function resetSpacing(ele, value){
+
+    ctx.clearRect(0,0, width,height);
+
+    points = [];
+    sticks = [];
+
+    space = parseFloat(value);
+
+    generatePoints(rows,cols,space);
+    generateSticks(rows,cols,space);
+    pinPoints();
+}
+function resetCols(ele, value){
+
+    ctx.clearRect(0,0, width,height);
+
+    points = [];
+    sticks = [];
+
+    cols = parseFloat(value);
+
+    generatePoints(rows,cols,space);
+    generateSticks(rows,cols,space);
+    pinPoints();
+}
+function resetRows(ele, value){
+
+    ctx.clearRect(0,0, width,height);
+
+    points = [];
+    sticks = [];
+
+    rows = parseFloat(value);
+    generatePoints(rows,cols,space);
+    generateSticks(rows,cols,space);
+    pinPoints();
+}
+
 
 function updatePoints(){
     for(let i = 0; i < points.length; i++){
@@ -99,19 +143,13 @@ function updatePoints(){
 function renderPoints(){
     for(let i = 0; i < points.length; i++){
         let p = points[i];
+
         if(p.pinned){
             ctx.beginPath();
-            ctx.fillStyle = "red";
-            ctx.arc(p.x, p.y, 5, 0, Math.PI*2);
+            ctx.fillStyle = p.color;
+            ctx.arc(p.x, p.y, ball_radius, 0, Math.PI*2);
             ctx.fill();
         }
-        // else{
-        //     ctx.beginPath();
-        //     ctx.fillStyle = "grey";
-        //     ctx.arc(p.x, p.y, ball_radius, 0, Math.PI*2);
-        //     ctx.fill();
-        // }
-        
     }
 }
 
@@ -158,6 +196,12 @@ let tearing = false,
     dragging = false,
     moving = false,
     add = false;
+
+let dragHandle;
+let offset = {
+    x:0,
+    y:0
+}
 
 document.body.addEventListener("mousedown",function(event){
     if(RBtear.checked){
@@ -206,26 +250,40 @@ document.body.addEventListener("mousemove",function(event){
     if(moving){
         for(let i=0;i<points.length;i++){
             if(points[i].pinned){
-                if(mouse.x >= points[i].x - 15 && mouse.x <= points[i].x + 15
-                    && mouse.y >= points[i].y - 15 && mouse.y <= points[i].y + 15){
-                    
-                    points[i].pinned = false;
-                    points[i].x = mouse.x;
-                    points[i].y = mouse.y;
-                    points[i].pinned = true;
+                if(mouse.x >= points[i].x - 5 && mouse.x <= points[i].x + 5
+                    && mouse.y >= points[i].y - 5 && mouse.y <= points[i].y + 5){
+                        points[i].color = "#90ee90";
+
+                        document.body.addEventListener("mousemove",onMouseMove);
+                        document.body.addEventListener("mouseup",onMouseUp);
+
+                        dragHandle = points[i];
+                        offset.x  = event.clientX - points[i].x;
+                        offset.y  = event.clientY - points[i].y;
                 }
             }
         }
     }
     if(add){
         for(let i=0;i<points.length;i++){
-            if(mouse.x >= points[i].x - 5 && mouse.x <= points[i].x + 5
-                 && mouse.y >= points[i].y - 5 && mouse.y <= points[i].y + 5){
+            if(mouse.x >= points[i].x - 3 && mouse.x <= points[i].x + 3
+                 && mouse.y >= points[i].y - 3 && mouse.y <= points[i].y + 3){
                 points[i].pinned = !points[i].pinned;
             }
         }
     }
 });
+
+// dragging pinned points
+function onMouseMove(event){
+    dragHandle.x = event.clientX - offset.x;
+    dragHandle.y = event.clientY - offset.y;
+}
+function onMouseUp(event){
+    document.body.removeEventListener("mousemove",onMouseMove);
+    document.body.removeEventListener("mouseup",onMouseUp);
+    dragHandle.color = "red";
+}
 
 document.body.addEventListener("mouseup",function(event){
     if(RBtear.checked){
@@ -243,59 +301,30 @@ document.body.addEventListener("mouseup",function(event){
         add = false;
     }
 });
-
-// RBtear.addEventListener('change',function(event){
-//     if(this.checked){
-//         tearing = true;
-//     }
-// })
-
-// RBdrag.addEventListener('change',function(event){
-//     if(this.checked){
-
-//     }
-// })
-
-// document.body.addEventListener("click",function(event){
-//     // console.log("click");
-//     mouse.x = event.clientX;
-//     mouse.y = event.clientY;
-//     for(let i=0;i<sticks.length;i++){
-//         // console.log(mouse.x, mouse.y);
-//         // console.log(sticks[i].p1.x)
-//         if(mouse.x >= sticks[i].p1.x - 5
-//             && mouse.x <= sticks[i].p1.x + 5
-//                 && mouse.y >= sticks[i].p1.y 
-//                 && mouse.y <= sticks[i].p2.y){
-                    
-//         }
-//     }
-// })
-
-
     
-function generatePoints(rows, cols){
-    let initial_x = 170,
+function generatePoints(rows, cols, value){
+    let initial_x = (width - (cols*space))/2,
         initial_y = 20;
     for(let i=0; i<rows; i++){
-        initial_y += 7;
+        initial_y += value;
 
         for(let j=0; j<cols; j++){
-            initial_x += 7;
+            initial_x += value;
             let point = {
                 x: initial_x,
                 y: initial_y,
                 oldx: initial_x - 3,
-                oldy: initial_y 
+                oldy: initial_y,
+                color: "red"
             }
             points.push(point);
         }
 
-        initial_x = 170;
+        initial_x = (width - (cols*space))/2;
     }
 }
 
-function generateSticks(rows, cols){
+function generateSticks(rows, cols, value){
     // hzt sticks
     let initial_index = 0;
     for(let i=0;i<rows;i++){
