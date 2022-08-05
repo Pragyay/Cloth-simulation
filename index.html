@@ -16,11 +16,14 @@
         </div>
         <div>
             <label for="cols">No. of Columns</label>
-            <input type="range" id="cols" min="20" max="80" step="1" value="80" oninput="resetCols(this,this.value)">
+            <input type="range" id="cols" min="20" max="76" step="1" value="65" oninput="resetCols(this,this.value)">
         </div>
         <div>
             <label for="rows">No. of rows</label>
-            <input type="range" id="rows" min="20" max="60" step="1" value="50" oninput="resetRows(this,this.value)">
+            <input type="range" id="rows" min="20" max="60" step="1" value="40" oninput="resetRows(this,this.value)">
+        </div>
+        <div>
+            <button id="changeCloth">Change</button>
         </div>
     </div>
 
@@ -39,17 +42,19 @@
         </div>
         <div>   
             <input type="radio", name="Action", id="add">
-            <label for="add">Pin/Unpin point</label>
+            <label for="add">Pin points</label>
+        </div>
+        <div>   
+            <input type="radio", name="Action", id="remove">
+            <label for="remove">Unpin points</label>
         </div>
 
     </div>
     <div id="canvas_container">
         <canvas id="canvas"></canvas>
     </div>
-    <!-- <script src="cloth1.js"></script>    -->
     <script src="cloth2.js"></script> 
-    <!-- <script src="flag.js"></script>  -->
-
+    <script src="events.js"></script> 
 
 </body>
 </html>

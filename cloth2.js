@@ -1,37 +1,36 @@
 let canvas = document.getElementById("canvas"),
     ctx = canvas.getContext("2d"),
-    width = canvas.width = window.innerWidth*70/100,
+    width = canvas.width = window.innerWidth*60/100,
     height = canvas.height = window.innerHeight;
 
+    // radio buttons
 let RBdrag = document.getElementById('drag'),
     RBtear = document.getElementById('tear'),
     RBmove = document.getElementById('move'),
-    RBadd = document.getElementById('add');
+    RBadd = document.getElementById('add'),
+    RBremove = document.getElementById('remove');
 
+    // input ranges
 let space = parseFloat(document.getElementById('spacing').value),
     rows = parseFloat(document.getElementById('rows').value),
     cols = parseFloat(document.getElementById('cols').value);
-    
 
+let btn = document.getElementById('changeCloth');
+    
 let points = []
     sticks = [],
     ball_radius = 10,
     bounce = 0.9,                     // reduce velocity after every bounce
-    gravity = 0.01,
-    friction = 0.999;
+    friction = 0.999,
+    increment = 3;
+
+let gravity;
+let topPinned = false;
 
 let mouse = {
     x: width/2,
     y: height/2
 }
-
-function distance(p1, p2){
-    let dx = p1.x - p2.x,
-        dy = p1.y - p2.y;
-
-    return Math.sqrt(dx*dx + dy*dy);
-}
-
 
 generatePoints(rows,cols,space);
 generateSticks(rows,cols,space);
@@ -42,6 +41,7 @@ pinPoints();
 update();
 
 function update(){
+    console.log(increment);
     for(let i=0; i<2;i++){
         updatePoints();
         updateSticks();
@@ -55,6 +55,14 @@ function update(){
     requestAnimationFrame(update);
 }
 
+function distance(p1, p2){
+    let dx = p1.x - p2.x,
+        dy = p1.y - p2.y;
+
+    return Math.sqrt(dx*dx + dy*dy);
+}
+
+// on change in range input
 function resetSpacing(ele, value){
 
     ctx.clearRect(0,0, width,height);
@@ -76,7 +84,7 @@ function resetCols(ele, value){
     sticks = [];
 
     cols = parseFloat(value);
-
+    
     generatePoints(rows,cols,space);
     generateSticks(rows,cols,space);
     pinPoints();
@@ -139,20 +147,6 @@ function updatePoints(){
 
     }
 }
-
-function renderPoints(){
-    for(let i = 0; i < points.length; i++){
-        let p = points[i];
-
-        if(p.pinned){
-            ctx.beginPath();
-            ctx.fillStyle = p.color;
-            ctx.arc(p.x, p.y, ball_radius, 0, Math.PI*2);
-            ctx.fill();
-        }
-    }
-}
-
 function updateSticks(){
     for(let i=0; i < sticks.length; i++){
         let s = sticks[i];
@@ -167,19 +161,30 @@ function updateSticks(){
             offsetY = dy * percent;
         
         if(!s.p1.pinned){
-            s.p1.x += offsetX;
-            s.p1.y += offsetY;
+            s.p1.x += offsetX/2;
+            s.p1.y += offsetY/2;
         }
 
         if(!s.p2.pinned){
-            s.p2.x -= offsetX;
-            s.p2.y -= offsetY;    
+            s.p2.x -= offsetX/2;
+            s.p2.y -= offsetY/2;    
         }
-        
-
     }
 }
 
+
+function renderPoints(){
+    for(let i = 0; i < points.length; i++){
+        let p = points[i];
+
+        if(p.pinned){
+            ctx.beginPath();
+            ctx.fillStyle = p.color;
+            ctx.arc(p.x, p.y, ball_radius, 0, Math.PI*2);
+            ctx.fill();
+        }
+    }
+}
 function renderSticks(){
     ctx.beginPath();
     for(let i = 0; i < sticks.length; i++){
@@ -187,121 +192,12 @@ function renderSticks(){
         ctx.moveTo(s.p1.x, s.p1.y);
         ctx.lineTo(s.p2.x, s.p2.y);
     }
-    ctx.strokeStyle = "white";
+    ctx.strokeStyle = "#DDC6B6";
     ctx.strokeWidth = 0.1;
     ctx.stroke();
 }
-
-let tearing = false,
-    dragging = false,
-    moving = false,
-    add = false;
-
-let dragHandle;
-let offset = {
-    x:0,
-    y:0
-}
-
-document.body.addEventListener("mousedown",function(event){
-    if(RBtear.checked){
-        tearing = true;
-        // console.log(tearing);
-    }
-    if(RBdrag.checked){
-        dragging = true;
-        // console.log(dragging);
-    }
-    if(RBmove.checked){
-        moving = true;
-    }
-    if(RBadd.checked){
-        add = true;
-    }
-});
-
-document.body.addEventListener("mousemove",function(event){
-    let rect = canvas.getBoundingClientRect();
-
-    mouse.x = (event.clientX - rect.left) / (rect.right - rect.left) * canvas.width;
-    mouse.y = (event.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
-
-    if(tearing){
-        for(let i=0;i<sticks.length;i++){
-            if(mouse.x >= sticks[i].p1.x - 5
-                && mouse.x <= sticks[i].p1.x + 5
-                  && mouse.y >= sticks[i].p1.y 
-                  && mouse.y <= sticks[i].p2.y){
-                sticks.splice(i, 1);
-            }
-        }
-    }
-    if(dragging){
-        for(let i=0;i<points.length;i++){
-            if(mouse.x >= points[i].x - 10 && mouse.x <= points[i].x + 10
-                 && mouse.y >= points[i].y - 10 && mouse.y <= points[i].y + 10){
-                if(!points[i].pinned){
-                    points[i].x = mouse.x;
-                    points[i].y = mouse.y;
-                }
-            }
-        }
-    }
-    if(moving){
-        for(let i=0;i<points.length;i++){
-            if(points[i].pinned){
-                if(mouse.x >= points[i].x - 5 && mouse.x <= points[i].x + 5
-                    && mouse.y >= points[i].y - 5 && mouse.y <= points[i].y + 5){
-                        points[i].color = "#90ee90";
-
-                        document.body.addEventListener("mousemove",onMouseMove);
-                        document.body.addEventListener("mouseup",onMouseUp);
-
-                        dragHandle = points[i];
-                        offset.x  = event.clientX - points[i].x;
-                        offset.y  = event.clientY - points[i].y;
-                }
-            }
-        }
-    }
-    if(add){
-        for(let i=0;i<points.length;i++){
-            if(mouse.x >= points[i].x - 3 && mouse.x <= points[i].x + 3
-                 && mouse.y >= points[i].y - 3 && mouse.y <= points[i].y + 3){
-                points[i].pinned = !points[i].pinned;
-            }
-        }
-    }
-});
-
-// dragging pinned points
-function onMouseMove(event){
-    dragHandle.x = event.clientX - offset.x;
-    dragHandle.y = event.clientY - offset.y;
-}
-function onMouseUp(event){
-    document.body.removeEventListener("mousemove",onMouseMove);
-    document.body.removeEventListener("mouseup",onMouseUp);
-    dragHandle.color = "red";
-}
-
-document.body.addEventListener("mouseup",function(event){
-    if(RBtear.checked){
-        tearing = false;
-        // console.log(tearing);
-    }
-    if(RBdrag.checked){
-        dragging = false;
-        // console.log(dragging);
-    }
-    if(RBmove.checked){
-        moving = false;
-    }
-    if(RBadd.checked){
-        add = false;
-    }
-});
     
+
 function generatePoints(rows, cols, value){
     let initial_x = (width - (cols*space))/2,
         initial_y = 20;
@@ -313,7 +209,7 @@ function generatePoints(rows, cols, value){
             let point = {
                 x: initial_x,
                 y: initial_y,
-                oldx: initial_x - 3,
+                oldx: initial_x - increment,
                 oldy: initial_y,
                 color: "red"
             }
@@ -323,7 +219,6 @@ function generatePoints(rows, cols, value){
         initial_x = (width - (cols*space))/2;
     }
 }
-
 function generateSticks(rows, cols, value){
     // hzt sticks
     let initial_index = 0;
@@ -355,18 +250,31 @@ function generateSticks(rows, cols, value){
         }
     }
 }
-
 function pinPoints(){
-    // for(let i=0;i<cols;i++){
-    //     points[i].pinned = true;
-    // }
-    points[0].pinned = true;
-    points[(rows-1)*cols].pinned = true;
-    // points[(rows-1)*cols/2].pinned = true;
 
-    points[cols-1].pinned = true;
-    points[rows*cols-1].pinned = true;
-    // points[(rows+1)*cols/2 - 1].pinned = true;
+    if(topPinned){
+        gravity = 0.06;
+        ball_radius = 3;
+        increment = 3;
+
+        for(let i=0;i<cols;i++){
+            points[i].pinned = true;
+        }
+    }
+    else{
+        gravity = 0.019;
+        ball_radius = 10;
+        increment = 3;
+
+        points[0].pinned = true;
+        points[(rows-1)*cols].pinned = true;
+        // points[(rows-1)*cols/2].pinned = true;
+
+        points[cols-1].pinned = true;
+        points[rows*cols-1].pinned = true;
+        // points[(rows+1)*cols/2 - 1].pinned = true;
+    }
+    
 }
 
 // function addVelocity(){
