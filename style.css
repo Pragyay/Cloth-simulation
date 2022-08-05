@@ -1,31 +1,36 @@
 html, body{
     margin: 0px;
-    background-color: black;
+    background-color: #0c0c0c;
     overflow: hidden;
+    accent-color: red;
+    font-family: Arial, Helvetica, sans-serif;
 }
 canvas{
     display: block;
     position: absolute;
     align-content: center;
     z-index: -1;
-    margin-left: 15%;
-    /* background-color: orange; */
+    margin-left: 20%;
+    background-color: black;
 }
 #actions{
     margin-right: 2%;
-    margin-left: 82%;
+    margin-left: 81%;
     position: absolute;
-    top: 10%;
+    top: 8%;
 }
 
 #actions div{
     margin: 0.5em;
 }
+#actions div input{
+    cursor: pointer;
+}
 
 #options{
     position: absolute;
     margin-left: 2%;
-    top: 10%;
+    top: 5%;
 }
 
 #options div{
@@ -34,17 +39,123 @@ canvas{
     margin: 0.5em;
 }
 
-#options div input{
-    width: 10em;
+label{
+    color: #DDC6B6;
+}
+button{
+    margin-top: 5%;
+    padding: 5%;
+    font-size: medium;
+    border-radius: 10%;
+    background-color: transparent;
+    color: #DDC6B6;
+    border: solid 2px#DDC6B6;
+    cursor: pointer;
+    width: fit-content;
+}
+button:hover{
+    background-color: #DDC6B6;
+    color: black;
+}
+
+input[type=range] {
+    height: 26px;
+    -webkit-appearance: none;
+    margin: 10px 0;
+    width: 100%;
     background: transparent;
-    outline: none;
-    opacity: 0.7;
-    -webkit-transition: .2s;
-    transition: opacity .2s;
-    font-size: smaller;
+}
+input[type=range]:focus {
+outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 14px;
+    cursor: pointer;
+    animate: 0.2s;
+    box-shadow: 1px 1px 1px #50555C;
+    background: #50555C;
+    border-radius: 14px;
+    border: 0px solid #000000;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    box-shadow: 0px 0px 0px #000000;
+    border: 0px solid #000000;
+    height: 20px;
+    width: 40px;
+    border-radius: 12px;
+    background: #DDC6B6;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -3px;
+}
+
+input[type=range]:focus::-webkit-slider-runnable-track {
+    background: #50555C;
+}
+
+input[type=range]::-moz-range-track {
+    width: 100%;
+    height: 14px;
+    cursor: pointer;
+    animate: 0.2s;
+    box-shadow: 1px 1px 1px #50555C;
+    background: #50555C;
+    border-radius: 14px;
+    border: 0px solid #000000;
+}
+
+input[type=range]::-moz-range-thumb {
+    box-shadow: 0px 0px 0px #000000;
+    border: 0px solid #000000;
+    height: 20px;
+    width: 40px;
+    border-radius: 12px;
+    background: #DDC6B6;
     cursor: pointer;
 }
 
-label{
-    color: white;
+input[type=range]::-ms-track {
+    width: 100%;
+    height: 14px;
+    cursor: pointer;
+    animate: 0.2s;
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+}
+
+input[type=range]::-ms-fill-lower {
+    background: #50555C;
+    border: 0px solid #000000;
+    border-radius: 28px;
+    box-shadow: 1px 1px 1px #50555C;
+}
+
+input[type=range]::-ms-fill-upper {
+    background: #50555C;
+    border: 0px solid #000000;
+    border-radius: 28px;
+    box-shadow: 1px 1px 1px #50555C;
+}
+
+input[type=range]::-ms-thumb {
+    margin-top: 1px;
+    box-shadow: 0px 0px 0px #000000;
+    border: 0px solid #000000;
+    height: 20px;
+    width: 40px;
+    border-radius: 12px;
+    background: #DDC6B6;
+    cursor: pointer;
+}
+
+input[type=range]:focus::-ms-fill-lower {
+    background: #50555C;
+}
+
+input[type=range]:focus::-ms-fill-upper {
+    background: #50555C;
 }
